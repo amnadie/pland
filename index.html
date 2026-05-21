@@ -388,45 +388,56 @@
 
     async function uploadImage(file, slotId) {
 
-      const compressed =
-        await compressImage(file);
+  const compressed =
+    await compressImage(file);
 
-      const fileName =
-        `${slotId}-${Date.now()}.jpg`;
+  const fileName =
+    `${slotId}-${Date.now()}.jpg`;
 
-      const { error } =
-        await supabaseClient.storage
-          .from("catalog-images")
-          .upload(fileName, compressed);
+  const { error: uploadError } =
+    await supabaseClient.storage
+      .from("catalog-images")
+      .upload(fileName, compressed, {
+        upsert: true,
+        contentType: "image/jpeg"
+      });
 
-      if (error) {
+  if (uploadError) {
 
-        console.error(error);
+    console.error("UPLOAD ERROR:", uploadError);
 
-        alert(
-          "Upload failed. Check bucket/table setup."
-        );
+    alert(uploadError.message);
 
-        return null;
-      }
+    return null;
+  }
 
-      const { data } =
-        supabaseClient.storage
-          .from("catalog-images")
-          .getPublicUrl(fileName);
+  const { data } =
+    supabaseClient.storage
+      .from("catalog-images")
+      .getPublicUrl(fileName);
 
-      const imageUrl =
-        data.publicUrl;
+  const imageUrl =
+    data.publicUrl;
 
-      await supabaseClient
-        .from("catalog_images")
-        .upsert({
-          slot_id: slotId,
-          image_url: imageUrl
-        });
+  const { error: dbError } =
+    await supabaseClient
+      .from("catalog_images")
+      .upsert({
+        slot_id: slotId,
+        image_url: imageUrl
+      });
 
-      return imageUrl;
-    }
+  if (dbError) {
+
+    console.error("DB ERROR:", dbError);
+
+    alert(dbError.message);
+
+    return null;
+  }
+
+  return imageUrl;
+}
 
     // =========================================================
     // GET IMAGE

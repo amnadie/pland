@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f1;
+      --card-bg: #b3b0a8;
+      --card-hover: #a09e96;
+      --text: #1a1a1a;
+      --muted: #6b6b65;
+      --accent: #1a1a1a;
+      --border: #c8c5bd;
+      --link: #2a2a2a;
+      --row-border: #d5d2ca;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      padding: 52px 60px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    /* ── Loading / Error states ── */
+    #status {
+      padding: 40px 60px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--muted);
+    }
+
+    /* ── Catalog list ── */
+    #catalog {
+      padding: 0 60px 80px;
+    }
+
+    /* ── Single row ── */
+    .catalog-row {
+      padding: 44px 0 48px;
+      border-bottom: 1px solid var(--row-border);
+      animation: fadeUp 0.45s ease both;
+    }
+    .catalog-row:first-child { padding-top: 48px; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Row meta bar ── */
+    .row-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 32px;
+      margin-bottom: 20px;
+    }
+    .insta-handle {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: clamp(1rem, 1.6vw, 1.25rem);
+      letter-spacing: 0.06em;
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--text);
+      padding-bottom: 2px;
+    }
+    .days-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(0.85rem, 1.2vw, 1rem);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Image grid ── */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    /* ── Image slot (upload zone) ── */
+    .img-slot {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      background: var(--card-bg);
+      border-radius: 2px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-slot:hover { background: var(--card-hover); }
+    .img-slot:hover .slot-label { opacity: 0.65; }
+
+    .slot-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(0.75rem, 1.1vw, 0.95rem);
+      color: #fff;
+      text-align: center;
+      line-height: 1.5;
+      letter-spacing: 0.08em;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      user-select: none;
+    }
+
+    .slot-preview {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .slot-preview.visible { display: block; }
+
+    .slot-remove {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 22px;
+      text-align: center;
+      display: none;
+      z-index: 5;
+      transition: background 0.15s;
+    }
+    .slot-remove:hover { background: rgba(0,0,0,0.8); }
+    .slot-remove.visible { display: block; }
+
+    /* hidden file inputs */
+    .file-input { display: none; }
+
+    /* ── Catalog link bar ── */
+    .catalog-link-bar {
+      margin-top: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .catalog-link-bar a {
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .catalog-link-bar a:hover { border-color: var(--text); }
+
+    /* ── Drag-over highlight ── */
+    .img-slot.drag-over { outline: 2px dashed rgba(255,255,255,0.7); }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .page-header, #catalog { padding-left: 28px; padding-right: 28px; }
+      .image-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+    @media (max-width: 480px) {
+      .page-header, #catalog { padding-left: 16px; padding-right: 16px; }
+      .image-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <span class="page-title">Pland</span>
+  </header>
+
+  <div id="status">Carregando dados…</div>
+  <div id="catalog"></div>
+
+  <script>
+    // ── Config ────────────────────────────────────────────────────────────────
+    const CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/" +
+      "2PACX-1vRdy4wBfU53-IMJ6lXGSlJbCZ_wJStMGrSWLekwQ4kck-IbfBC_2fTFx4UetXCJIcQpfmCExSxe7t3g" +
+      "/pub?output=csv";
+    const IMAGES_PER_ROW = 4;
+
+    // ── CSV Parser ────────────────────────────────────────────────────────────
+    function parseCSV(text) {
+      const lines = text.trim().split("\n");
+      const headers = splitCSVLine(lines[0]).map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = splitCSVLine(line);
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = (values[i] || "").trim(); });
+        return obj;
+      });
+    }
+
+    function splitCSVLine(line) {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+        } else if (ch === "," && !inQuotes) {
+          result.push(current);
+          current = "";
+        } else {
+          current += ch;
+        }
+      }
+      result.push(current);
+      return result;
+    }
+
+    // ── Column resolver ───────────────────────────────────────────────────────
+    function findCol(row, ...candidates) {
+      for (const c of candidates) {
+        for (const k of Object.keys(row)) {
+          if (k.toLowerCase().replace(/[áàâãä]/g, "a")
+               .includes(c.toLowerCase().replace(/[áàâãä]/g, "a"))) {
+            return row[k];
+          }
+        }
+      }
+      return "";
+    }
+
+    // ── Build one catalog row ─────────────────────────────────────────────────
+    let rowCounter = 0;
+
+    function buildRow(data) {
+      rowCounter++;
+      const rowId = `row-${rowCounter}`;
+
+      const instagram = findCol(data, "instagram");
+      const catalogUrl = findCol(data, "catálogo", "catalogo", "catalog", "link");
+
+      const row = document.createElement("div");
+      row.className = "catalog-row";
+      row.style.animationDelay = `${(rowCounter - 1) * 0.07}s`;
+
+      // ── Meta bar
+      const meta = document.createElement("div");
+      meta.className = "row-meta";
+
+      const handle = document.createElement("span");
+      handle.className = "insta-handle";
+      handle.textContent = instagram || "—";
+      meta.appendChild(handle);
+
+      const daysLbl = document.createElement("span");
+      daysLbl.className = "days-label";
+      daysLbl.textContent = "days:";
+      meta.appendChild(daysLbl);
+
+      row.appendChild(meta);
+
+      // ── Image grid
+      const grid = document.createElement("div");
+      grid.className = "image-grid";
+
+      for (let i = 1; i <= IMAGES_PER_ROW; i++) {
+        const slotId = `${rowId}-slot-${i}`;
+        const slot = document.createElement("div");
+        slot.className = "img-slot";
+        slot.setAttribute("data-slot", slotId);
+        slot.title = `Clique para adicionar imagem ${i}`;
+
+        // Label
+        const lbl = document.createElement("div");
+        lbl.className = "slot-label";
+        lbl.innerHTML = `CATALOG<br>IMAGE<br>#${i}`;
+        slot.appendChild(lbl);
+
+        // Preview img
+        const preview = document.createElement("img");
+        preview.className = "slot-preview";
+        preview.alt = `Imagem ${i}`;
+        slot.appendChild(preview);
+
+        // Remove button
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "slot-remove";
+        removeBtn.innerHTML = "×";
+        removeBtn.title = "Remover imagem";
+        removeBtn.addEventListener("click", e => {
+          e.stopPropagation();
+          preview.src = "";
+          preview.classList.remove("visible");
+          removeBtn.classList.remove("visible");
+          lbl.style.display = "";
+        });
+        slot.appendChild(removeBtn);
+
+        // Hidden file input
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+        fileInput.className = "file-input";
+        fileInput.addEventListener("change", () => {
+          const file = fileInput.files[0];
+          if (!file) return;
+          loadImageFile(file, preview, lbl, removeBtn);
+          fileInput.value = "";
+        });
+        slot.appendChild(fileInput);
+
+        // Click to open file dialog
+        slot.addEventListener("click", () => fileInput.click());
+
+        // Drag & drop
+        slot.addEventListener("dragover", e => { e.preventDefault(); slot.classList.add("drag-over"); });
+        slot.addEventListener("dragleave", () => slot.classList.remove("drag-over"));
+        slot.addEventListener("drop", e => {
+          e.preventDefault();
+          slot.classList.remove("drag-over");
+          const file = e.dataTransfer.files[0];
+          if (file && file.type.startsWith("image/")) {
+            loadImageFile(file, preview, lbl, removeBtn);
+          }
+        });
+
+        grid.appendChild(slot);
+      }
+      row.appendChild(grid);
+
+      // ── Catalog link
+      const linkBar = document.createElement("div");
+      linkBar.className = "catalog-link-bar";
+      if (catalogUrl) {
+        linkBar.innerHTML = `catalog link: <a href="${catalogUrl}" target="_blank" rel="noopener">${catalogUrl}</a>`;
+      } else {
+        linkBar.textContent = "catalog link: —";
+      }
+      row.appendChild(linkBar);
+
+      return row;
+    }
+
+    // ── Image loader helper ───────────────────────────────────────────────────
+    function loadImageFile(file, preview, label, removeBtn) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+        preview.classList.add("visible");
+        removeBtn.classList.add("visible");
+        label.style.display = "none";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Fetch & render ────────────────────────────────────────────────────────
+    async function init() {
+      const statusEl = document.getElementById("status");
+      const catalogEl = document.getElementById("catalog");
+
+      try {
+        const res = await fetch(CSV_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const rows = parseCSV(text).filter(r => {
+          // skip completely empty rows
+          return Object.values(r).some(v => v.trim() !== "");
+        });
+
+        statusEl.style.display = "none";
+
+        if (rows.length === 0) {
+          statusEl.textContent = "Nenhum dado encontrado na planilha.";
+          statusEl.style.display = "block";
+          return;
+        }
+
+        rows.forEach(r => catalogEl.appendChild(buildRow(r)));
+
+      } catch (err) {
+        statusEl.textContent =
+          "Não foi possível carregar a planilha. Verifique se ela está publicada publicamente. (" + err.message + ")";
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

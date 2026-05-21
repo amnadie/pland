@@ -2,18 +2,22 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Catálogo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <title>Pland Catalog</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap"
     rel="stylesheet"
   />
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -26,145 +30,95 @@
       --card-hover: #a09e96;
       --text: #1a1a1a;
       --muted: #6b6b65;
-      --accent: #1a1a1a;
-      --border: #c8c5bd;
-      --link: #2a2a2a;
-      --row-border: #d5d2ca;
+      --border: #d5d2ca;
     }
 
     html, body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Jost', sans-serif;
-      font-weight: 300;
       min-height: 100vh;
     }
 
-    /* ── Page Header ── */
     .page-header {
       padding: 52px 60px 32px;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: baseline;
-      gap: 24px;
     }
 
     .page-title {
       font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
       font-style: italic;
-      font-size: clamp(1.6rem, 3vw, 2.4rem);
-      letter-spacing: 0.04em;
-      color: var(--text);
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      letter-spacing: 0.05em;
     }
 
-    /* ── Loading ── */
     #status {
       padding: 40px 60px;
-      font-family: 'Cormorant Garamond', serif;
+      color: #666;
       font-style: italic;
-      font-size: 1.15rem;
-      color: var(--muted);
+      font-family: 'Cormorant Garamond', serif;
     }
 
-    /* ── Catalog ── */
     #catalog {
       padding: 0 60px 80px;
     }
 
-    /* ── Rows ── */
     .catalog-row {
       padding: 44px 0 48px;
-      border-bottom: 1px solid var(--row-border);
-      animation: fadeUp 0.45s ease both;
+      border-bottom: 1px solid var(--border);
     }
 
-    .catalog-row:first-child {
-      padding-top: 48px;
-    }
-
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(18px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ── Meta ── */
     .row-meta {
       display: flex;
-      align-items: baseline;
       gap: 32px;
       margin-bottom: 20px;
+      align-items: baseline;
     }
 
     .insta-handle {
       font-family: 'Cormorant Garamond', serif;
-      font-weight: 400;
       font-style: italic;
-      font-size: clamp(1rem, 1.6vw, 1.25rem);
-      letter-spacing: 0.06em;
-      color: var(--text);
-      text-decoration: none;
-      border-bottom: 1px solid var(--text);
+      font-size: 1.2rem;
+      border-bottom: 1px solid #000;
       padding-bottom: 2px;
     }
 
     .days-label {
-      font-family: 'Cormorant Garamond', serif;
+      color: #777;
       font-style: italic;
-      font-weight: 300;
-      font-size: clamp(0.85rem, 1.2vw, 1rem);
-      color: var(--muted);
-      letter-spacing: 0.04em;
+      font-family: 'Cormorant Garamond', serif;
     }
 
-    /* ── Grid ── */
     .image-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
     }
 
-    /* ── Image Slots ── */
     .img-slot {
       position: relative;
       aspect-ratio: 3 / 4;
       background: var(--card-bg);
-      border-radius: 2px;
-      cursor: pointer;
       overflow: hidden;
-      transition: background 0.2s ease;
+      cursor: pointer;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      transition: background 0.2s;
     }
 
     .img-slot:hover {
       background: var(--card-hover);
     }
 
-    .img-slot:hover .slot-label {
-      opacity: 0.65;
-    }
-
     .slot-label {
+      color: white;
+      text-align: center;
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
-      font-weight: 300;
-      font-size: clamp(0.75rem, 1.1vw, 0.95rem);
-      color: #fff;
-      text-align: center;
-      line-height: 1.5;
       letter-spacing: 0.08em;
+      line-height: 1.5;
       pointer-events: none;
-      transition: opacity 0.2s;
-      user-select: none;
     }
 
     .slot-preview {
@@ -182,25 +136,17 @@
 
     .slot-remove {
       position: absolute;
-      top: 7px;
-      right: 7px;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.55);
-      color: #fff;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
       border: none;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      color: white;
       cursor: pointer;
-      font-size: 13px;
-      line-height: 22px;
-      text-align: center;
       display: none;
       z-index: 5;
-      transition: background 0.15s;
-    }
-
-    .slot-remove:hover {
-      background: rgba(0,0,0,0.8);
     }
 
     .slot-remove.visible {
@@ -211,58 +157,35 @@
       display: none;
     }
 
-    /* ── Catalog link ── */
     .catalog-link-bar {
       margin-top: 16px;
-      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.92rem;
+      color: #777;
       font-style: italic;
-      font-size: clamp(0.82rem, 1.1vw, 0.95rem);
-      color: var(--muted);
-      letter-spacing: 0.04em;
+      font-family: 'Cormorant Garamond', serif;
     }
 
     .catalog-link-bar a {
-      color: var(--link);
-      text-decoration: none;
-      border-bottom: 1px solid var(--border);
-      transition: border-color 0.2s;
+      color: inherit;
     }
 
-    .catalog-link-bar a:hover {
-      border-color: var(--text);
-    }
-
-    /* ── Drag ── */
     .img-slot.drag-over {
-      outline: 2px dashed rgba(255,255,255,0.7);
+      outline: 2px dashed rgba(255,255,255,0.8);
     }
 
-    /* ── Responsive ── */
     @media (max-width: 860px) {
+
       .page-header,
       #catalog {
-        padding-left: 28px;
-        padding-right: 28px;
+        padding-left: 24px;
+        padding-right: 24px;
       }
 
       .image-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
       }
     }
 
-    @media (max-width: 480px) {
-      .page-header,
-      #catalog {
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-
-      .image-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-      }
-    }
   </style>
 </head>
 
@@ -272,14 +195,31 @@
     <span class="page-title">Pland</span>
   </header>
 
-  <div id="status">Carregando dados…</div>
+  <div id="status">Loading catalog...</div>
+
   <div id="catalog"></div>
 
   <script>
 
-    // ─────────────────────────────────────────────────────────
-    // CONFIG
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
+    // SUPABASE
+    // =========================================================
+
+    const SUPABASE_URL =
+      "https://vcmzbsvrppdgrexjftpy.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInZjbXpic3ZycHBkZ3JleGpmdHB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNjQyODksImV4cCI6MjA5NDk0MDI4OX0.QEa5KaxiCurmqPp7Ho33ot8CCLkesCG73zq39zJLwH8";
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+    // =========================================================
+    // GOOGLE SHEET
+    // =========================================================
 
     const CSV_URL =
       "https://docs.google.com/spreadsheets/d/e/" +
@@ -288,15 +228,16 @@
 
     const IMAGES_PER_ROW = 4;
 
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
     // CSV PARSER
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
 
     function parseCSV(text) {
 
       const lines = text.trim().split("\n");
 
-      const headers = splitCSVLine(lines[0]).map(h => h.trim());
+      const headers =
+        splitCSVLine(lines[0]).map(h => h.trim());
 
       return lines.slice(1).map(line => {
 
@@ -345,9 +286,9 @@
       return result;
     }
 
-    // ─────────────────────────────────────────────────────────
-    // COLUMN FINDER
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
+    // FIND COLUMN
+    // =========================================================
 
     function findCol(row, ...candidates) {
 
@@ -371,100 +312,153 @@
       return "";
     }
 
-    // ─────────────────────────────────────────────────────────
-    // LOCAL STORAGE
-    // ─────────────────────────────────────────────────────────
-
-    function saveImage(slotId, imageData) {
-      localStorage.setItem(`catalog-image-${slotId}`, imageData);
-    }
-
-    function getSavedImage(slotId) {
-      return localStorage.getItem(`catalog-image-${slotId}`);
-    }
-
-    function removeSavedImage(slotId) {
-      localStorage.removeItem(`catalog-image-${slotId}`);
-    }
-
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
     // IMAGE COMPRESSION
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
 
-    function loadImageFile(file, preview, label, removeBtn, slotId) {
+    async function compressImage(file) {
 
-      const img = new Image();
+      return new Promise(resolve => {
 
-      const reader = new FileReader();
+        const img = new Image();
 
-      reader.onload = e => {
-        img.src = e.target.result;
-      };
+        const reader = new FileReader();
 
-      img.onload = () => {
+        reader.onload = e => {
+          img.src = e.target.result;
+        };
 
-        const canvas = document.createElement("canvas");
+        img.onload = () => {
 
-        const ctx = canvas.getContext("2d");
+          const canvas =
+            document.createElement("canvas");
 
-        // Max dimensions
-        const MAX_WIDTH = 1200;
-        const MAX_HEIGHT = 1600;
+          const ctx =
+            canvas.getContext("2d");
 
-        let width = img.width;
-        let height = img.height;
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1600;
 
-        // Resize huge images
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          let width = img.width;
+          let height = img.height;
 
-          const ratio = Math.min(
-            MAX_WIDTH / width,
-            MAX_HEIGHT / height
+          if (
+            width > MAX_WIDTH ||
+            height > MAX_HEIGHT
+          ) {
+
+            const ratio = Math.min(
+              MAX_WIDTH / width,
+              MAX_HEIGHT / height
+            );
+
+            width *= ratio;
+            height *= ratio;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          ctx.imageSmoothingEnabled = true;
+
+          ctx.imageSmoothingQuality = "high";
+
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            width,
+            height
           );
 
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
+          canvas.toBlob(
+            blob => resolve(blob),
+            "image/jpeg",
+            0.55
+          );
+        };
 
-        canvas.width = width;
-        canvas.height = height;
-
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Strong JPEG compression
-        const compressedData = canvas.toDataURL(
-          "image/jpeg",
-          0.55
-        );
-
-        preview.src = compressedData;
-
-        preview.classList.add("visible");
-
-        removeBtn.classList.add("visible");
-
-        label.style.display = "none";
-
-        // Save compressed image
-        saveImage(slotId, compressedData);
-
-        // Debug size
-        const sizeKB = Math.round(compressedData.length / 1024);
-
-        console.log(
-          `Saved compressed image (${sizeKB} KB)`
-        );
-      };
-
-      reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
+      });
     }
 
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
+    // UPLOAD IMAGE
+    // =========================================================
+
+    async function uploadImage(file, slotId) {
+
+      const compressed =
+        await compressImage(file);
+
+      const fileName =
+        `${slotId}-${Date.now()}.jpg`;
+
+      const { error } =
+        await supabaseClient.storage
+          .from("catalog-images")
+          .upload(fileName, compressed);
+
+      if (error) {
+
+        console.error(error);
+
+        alert(
+          "Upload failed. Check bucket/table setup."
+        );
+
+        return null;
+      }
+
+      const { data } =
+        supabaseClient.storage
+          .from("catalog-images")
+          .getPublicUrl(fileName);
+
+      const imageUrl =
+        data.publicUrl;
+
+      await supabaseClient
+        .from("catalog_images")
+        .upsert({
+          slot_id: slotId,
+          image_url: imageUrl
+        });
+
+      return imageUrl;
+    }
+
+    // =========================================================
+    // GET IMAGE
+    // =========================================================
+
+    async function getSavedImage(slotId) {
+
+      const { data } =
+        await supabaseClient
+          .from("catalog_images")
+          .select("*")
+          .eq("slot_id", slotId)
+          .single();
+
+      return data?.image_url || null;
+    }
+
+    // =========================================================
+    // REMOVE IMAGE
+    // =========================================================
+
+    async function removeImage(slotId) {
+
+      await supabaseClient
+        .from("catalog_images")
+        .delete()
+        .eq("slot_id", slotId);
+    }
+
+    // =========================================================
     // BUILD ROW
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
 
     let rowCounter = 0;
 
@@ -474,202 +468,287 @@
 
       const rowId = `row-${rowCounter}`;
 
-      const instagram = findCol(data, "instagram");
+      const instagram =
+        findCol(data, "instagram");
 
-      const catalogUrl = findCol(
-        data,
-        "catálogo",
-        "catalogo",
-        "catalog",
-        "link"
-      );
+      const catalogUrl =
+        findCol(
+          data,
+          "catalog",
+          "link",
+          "catálogo"
+        );
 
-      const row = document.createElement("div");
+      const row =
+        document.createElement("div");
 
       row.className = "catalog-row";
 
-      row.style.animationDelay =
-        `${(rowCounter - 1) * 0.07}s`;
-
-      // Meta
-      const meta = document.createElement("div");
+      // META
+      const meta =
+        document.createElement("div");
 
       meta.className = "row-meta";
 
-      const handle = document.createElement("span");
+      const handle =
+        document.createElement("span");
 
       handle.className = "insta-handle";
 
-      handle.textContent = instagram || "—";
+      handle.textContent =
+        instagram || "—";
 
       meta.appendChild(handle);
 
-      const daysLbl = document.createElement("span");
+      const days =
+        document.createElement("span");
 
-      daysLbl.className = "days-label";
+      days.className = "days-label";
 
-      daysLbl.textContent = "days:";
+      days.textContent = "days:";
 
-      meta.appendChild(daysLbl);
+      meta.appendChild(days);
 
       row.appendChild(meta);
 
-      // Grid
-      const grid = document.createElement("div");
+      // GRID
+      const grid =
+        document.createElement("div");
 
       grid.className = "image-grid";
 
       for (let i = 1; i <= IMAGES_PER_ROW; i++) {
 
-        const slotId = `${rowId}-slot-${i}`;
+        const slotId =
+          `${rowId}-slot-${i}`;
 
-        const slot = document.createElement("div");
+        const slot =
+          document.createElement("div");
 
         slot.className = "img-slot";
 
-        // Label
-        const lbl = document.createElement("div");
+        // LABEL
+        const label =
+          document.createElement("div");
 
-        lbl.className = "slot-label";
+        label.className = "slot-label";
 
-        lbl.innerHTML = `CATALOG<br>IMAGE<br>#${i}`;
+        label.innerHTML =
+          `CATALOG<br>IMAGE<br>#${i}`;
 
-        slot.appendChild(lbl);
+        slot.appendChild(label);
 
-        // Preview
-        const preview = document.createElement("img");
+        // PREVIEW
+        const preview =
+          document.createElement("img");
 
         preview.className = "slot-preview";
 
         slot.appendChild(preview);
 
-        // Remove
-        const removeBtn = document.createElement("button");
+        // REMOVE
+        const removeBtn =
+          document.createElement("button");
 
-        removeBtn.className = "slot-remove";
+        removeBtn.className =
+          "slot-remove";
 
         removeBtn.innerHTML = "×";
 
-        removeBtn.addEventListener("click", e => {
+        removeBtn.addEventListener(
+          "click",
+          async e => {
 
-          e.stopPropagation();
+            e.stopPropagation();
 
-          preview.src = "";
+            preview.src = "";
 
-          preview.classList.remove("visible");
+            preview.classList.remove(
+              "visible"
+            );
 
-          removeBtn.classList.remove("visible");
+            removeBtn.classList.remove(
+              "visible"
+            );
 
-          lbl.style.display = "";
+            label.style.display = "";
 
-          removeSavedImage(slotId);
-        });
+            await removeImage(slotId);
+          }
+        );
 
         slot.appendChild(removeBtn);
 
-        // Restore saved image
-        const savedImage = getSavedImage(slotId);
+        // RESTORE SAVED IMAGE
+        getSavedImage(slotId)
+          .then(saved => {
 
-        if (savedImage) {
+            if (!saved) return;
 
-          preview.src = savedImage;
+            preview.src = saved;
 
-          preview.classList.add("visible");
+            preview.classList.add(
+              "visible"
+            );
 
-          removeBtn.classList.add("visible");
+            removeBtn.classList.add(
+              "visible"
+            );
 
-          lbl.style.display = "none";
-        }
+            label.style.display = "none";
+          });
 
-        // File input
-        const fileInput = document.createElement("input");
+        // INPUT
+        const input =
+          document.createElement("input");
 
-        fileInput.type = "file";
+        input.type = "file";
 
-        fileInput.accept = "image/*";
+        input.accept = "image/*";
 
-        fileInput.className = "file-input";
+        input.className = "file-input";
 
-        fileInput.addEventListener("change", () => {
+        input.addEventListener(
+          "change",
+          async () => {
 
-          const file = fileInput.files[0];
+            const file =
+              input.files[0];
 
-          if (!file) return;
+            if (!file) return;
 
-          loadImageFile(
-            file,
-            preview,
-            lbl,
-            removeBtn,
-            slotId
-          );
+            slot.style.opacity = "0.5";
 
-          fileInput.value = "";
-        });
+            const url =
+              await uploadImage(
+                file,
+                slotId
+              );
 
-        slot.appendChild(fileInput);
+            slot.style.opacity = "1";
 
-        // Click upload
-        slot.addEventListener("click", () => {
-          fileInput.click();
-        });
+            if (!url) return;
 
-        // Drag over
-        slot.addEventListener("dragover", e => {
+            preview.src = url;
 
-          e.preventDefault();
+            preview.classList.add(
+              "visible"
+            );
 
-          slot.classList.add("drag-over");
-        });
+            removeBtn.classList.add(
+              "visible"
+            );
 
-        // Drag leave
-        slot.addEventListener("dragleave", () => {
+            label.style.display = "none";
 
-          slot.classList.remove("drag-over");
-        });
+            input.value = "";
+          }
+        );
 
-        // Drop
-        slot.addEventListener("drop", e => {
+        slot.appendChild(input);
 
-          e.preventDefault();
+        // CLICK
+        slot.addEventListener(
+          "click",
+          () => input.click()
+        );
 
-          slot.classList.remove("drag-over");
+        // DRAG OVER
+        slot.addEventListener(
+          "dragover",
+          e => {
 
-          const file = e.dataTransfer.files[0];
+            e.preventDefault();
 
-          if (
-            file &&
-            file.type.startsWith("image/")
-          ) {
-
-            loadImageFile(
-              file,
-              preview,
-              lbl,
-              removeBtn,
-              slotId
+            slot.classList.add(
+              "drag-over"
             );
           }
-        });
+        );
+
+        // DRAG LEAVE
+        slot.addEventListener(
+          "dragleave",
+          () => {
+
+            slot.classList.remove(
+              "drag-over"
+            );
+          }
+        );
+
+        // DROP
+        slot.addEventListener(
+          "drop",
+          async e => {
+
+            e.preventDefault();
+
+            slot.classList.remove(
+              "drag-over"
+            );
+
+            const file =
+              e.dataTransfer.files[0];
+
+            if (
+              !file ||
+              !file.type.startsWith(
+                "image/"
+              )
+            ) return;
+
+            slot.style.opacity = "0.5";
+
+            const url =
+              await uploadImage(
+                file,
+                slotId
+              );
+
+            slot.style.opacity = "1";
+
+            if (!url) return;
+
+            preview.src = url;
+
+            preview.classList.add(
+              "visible"
+            );
+
+            removeBtn.classList.add(
+              "visible"
+            );
+
+            label.style.display = "none";
+          }
+        );
 
         grid.appendChild(slot);
       }
 
       row.appendChild(grid);
 
-      // Link
-      const linkBar = document.createElement("div");
+      // LINK
+      const linkBar =
+        document.createElement("div");
 
-      linkBar.className = "catalog-link-bar";
+      linkBar.className =
+        "catalog-link-bar";
 
       if (catalogUrl) {
 
         linkBar.innerHTML =
-          `catalog link: <a href="${catalogUrl}" target="_blank">${catalogUrl}</a>`;
+          `catalog link:
+          <a href="${catalogUrl}"
+          target="_blank">
+          ${catalogUrl}
+          </a>`;
 
       } else {
 
-        linkBar.textContent = "catalog link: —";
+        linkBar.textContent =
+          "catalog link: —";
       }
 
       row.appendChild(linkBar);
@@ -677,9 +756,9 @@
       return row;
     }
 
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
     // INIT
-    // ─────────────────────────────────────────────────────────
+    // =========================================================
 
     async function init() {
 
@@ -691,40 +770,33 @@
 
       try {
 
-        const res = await fetch(CSV_URL);
+        const res =
+          await fetch(CSV_URL);
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        const text =
+          await res.text();
 
-        const text = await res.text();
-
-        const rows = parseCSV(text).filter(r => {
-          return Object.values(r)
-            .some(v => v.trim() !== "");
-        });
+        const rows =
+          parseCSV(text).filter(r => {
+            return Object.values(r)
+              .some(v => v.trim() !== "");
+          });
 
         statusEl.style.display = "none";
 
-        if (rows.length === 0) {
-
-          statusEl.textContent =
-            "Nenhum dado encontrado.";
-
-          statusEl.style.display = "block";
-
-          return;
-        }
-
         rows.forEach(r => {
-          catalogEl.appendChild(buildRow(r));
+
+          catalogEl.appendChild(
+            buildRow(r)
+          );
         });
 
       } catch (err) {
 
+        console.error(err);
+
         statusEl.textContent =
-          "Erro ao carregar planilha: " +
-          err.message;
+          "Failed to load sheet.";
       }
     }
 
